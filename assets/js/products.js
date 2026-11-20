@@ -1,0 +1,281 @@
+// ============================================================
+//  کاتالوگ محصولات نمونه — فروشگاه ارغوان
+//  Sample product catalog. Each product has a stable id.
+//  تصاویر به‌صورت SVG داخل پروژه ذخیره شده‌اند.
+// ============================================================
+
+const PRODUCTS = [
+  // ============ زیورآلات ============
+  {
+    id: "necklace-silver-petal",
+    name: "گردنبند نقره‌ای گلبرگ",
+    category: "زیورآلات",
+    price: 1850,
+    previousPrice: null,
+    stock: 8,
+    featured: true,
+    isNew: true,
+    images: ["p-necklace-silver.svg", "p-necklace-silver-2.svg"],
+    alt: "گردنبند نقره‌ای با طراحی گلبرگ روی پس‌زمینه روشن",
+    short: "گردنبند نقره با طرح گلبرگ، مناسب استفاده روزانه و رسمی.",
+    full:
+      "این گردنبند نقره‌ای با الهام از گلبرگ‌های بهاری طراحی شده و زنجیر نازک آن طول قابل‌تنظیم دارد. مناسب برای استفاده روزمره و مجالس رسمی. همراه با جعبه‌ی مخمل ارسال می‌شود.",
+    variants: null,
+  },
+  {
+    id: "earrings-gold-hoop",
+    name: "گوشواره طلایی حلقه‌ای",
+    category: "زیورآلات",
+    price: 1200,
+    previousPrice: 1500,
+    stock: 12,
+    featured: true,
+    isNew: false,
+    images: ["p-earrings-gold.svg", "p-earrings-gold-2.svg"],
+    alt: "گوشواره طلایی حلقه‌ای ظریف",
+    short: "گوشواره حلقه‌ای طلایی با طرح ظریف و سبک.",
+    full:
+      "گوشواره حلقه‌ای طلایی با وزن سبک و بسته‌شدن ایمن. برای استفاده روزمره مناسب است و با هر لباسی هماهنگ می‌شود.",
+    variants: null,
+  },
+  {
+    id: "ring-turquoise",
+    name: "انگشتر فیروزه‌ای",
+    category: "زیورآلات",
+    price: 2100,
+    previousPrice: null,
+    stock: 5,
+    featured: false,
+    isNew: true,
+    images: ["p-ring-turquoise.svg", "p-ring-turquoise-2.svg"],
+    alt: "انگشتر نقره با سنگ فیروزه",
+    short: "انگشتر نقره با سنگ فیروزه‌ی دست‌تراش.",
+    full:
+      "انگشتر نقره با سنگ فیروزه‌ی دست‌تراش، هر قطعه منحصر به فرد است. قاب نقره با کنده‌کاری ظریف تزئین شده.",
+    variants: [
+      { name: "اندازه", options: ["۱۶", "۱۷", "۱۸", "۱۹", "۲۰"] },
+    ],
+  },
+  {
+    id: "bracelet-pearl",
+    name: "دستبند مرواریدی",
+    category: "زیورآلات",
+    price: 980,
+    previousPrice: null,
+    stock: 0, // ناموجود
+    featured: false,
+    isNew: false,
+    images: ["p-bracelet-pearl.svg", "p-bracelet-pearl-2.svg"],
+    alt: "دستبند مرواریدی سفید ظریف",
+    short: "دستبند مرواریدی با مرواریدهای طبیعی.",
+    full:
+      "دستبند مرواریدی ساخته شده از مرواریدهای طبیعی و نخ مقاوم. مناسب هدیه و استفاده رسمی.",
+    variants: null,
+  },
+
+  // ============ کیف و اکسسوری ============
+  {
+    id: "bag-leather-crossbody",
+    name: "کیف چرمی متصل‌به‌بدن",
+    category: "کیف و اکسسوری",
+    price: 3200,
+    previousPrice: null,
+    stock: 6,
+    featured: true,
+    isNew: true,
+    images: ["p-bag-leather.svg", "p-bag-leather-2.svg"],
+    alt: "کیف چرمی متصل‌به‌بدن به رنگ قهوه‌ای",
+    short: "کیف چرمی متصل‌به‌بدن با جیب‌های متعدد.",
+    full:
+      "کیف چرمی متصل‌به‌بدن با چرم طبیعی، بند قابل‌تنظیم و جیب‌های داخلی برای کارت و گوشی. مناسب استفاده روزمره.",
+    variants: [
+      { name: "رنگ", options: ["قهوه‌ای", "مشکی", "بادمجانی"] },
+    ],
+  },
+  {
+    id: "scarf-silk-blossom",
+    name: "شال ابریشمی شکوفه",
+    category: "کیف و اکسسوری",
+    price: 1450,
+    previousPrice: 1800,
+    stock: 14,
+    featured: true,
+    isNew: false,
+    images: ["p-scarf-silk.svg", "p-scarf-silk-2.svg"],
+    alt: "شال ابریشمی با طرح شکوفه به رنگ‌های گرم",
+    short: "شال ابریشمی با طرح شکوفه و رنگ‌های گرم.",
+    full:
+      "شال ابریشمی نازک با طرح شکوفه‌های بهاری و رنگ‌های گرم. سبک و مناسب برای همه فصول.",
+    variants: null,
+  },
+  {
+    id: "wallet-leather",
+    name: "کیف پول چرمی",
+    category: "کیف و اکسسوری",
+    price: 760,
+    previousPrice: null,
+    stock: 20,
+    featured: false,
+    isNew: false,
+    images: ["p-wallet.svg", "p-wallet-2.svg"],
+    alt: "کیف پول چرمی تاشداری",
+    short: "کیف پول چرمی تاشداری با جیب کارت.",
+    full:
+      "کیف پول چرمی تاشداری با جیب‌های کارت، جای پول نقد و کوپن. دوام بالا و دوخت تمیز.",
+    variants: null,
+  },
+  {
+    id: "sunglasses-cat-eye",
+    name: "عینک آفتابی چشم گربه",
+    category: "کیف و اکسسوری",
+    price: 1100,
+    previousPrice: null,
+    stock: 9,
+    featured: false,
+    isNew: true,
+    images: ["p-sunglasses.svg", "p-sunglasses-2.svg"],
+    alt: "عینک آفتابی مدل چشم گربه",
+    short: "عینک آفتابی مدل چشم گربه با فریم سبک.",
+    full:
+      "عینک آفتابی با فریم سبک و لنز UV400. مناسب صورت‌های مختلف و استفاده روزمره.",
+    variants: null,
+  },
+
+  // ============ لوازم خانه ============
+  {
+    id: "mug-ceramic-stripe",
+    name: "ماگ سرامیکی خط‌دار",
+    category: "لوازم خانه",
+    price: 450,
+    previousPrice: null,
+    stock: 25,
+    featured: true,
+    isNew: false,
+    images: ["p-mug.svg", "p-mug-2.svg"],
+    alt: "ماگ سرامیکی سفید با خط‌های رنگی",
+    short: "ماگ سرامیکی با خط‌های رنگی و دسته‌ی راحت.",
+    full:
+      "ماگ سرامیکی با خط‌های رنگی، دسته‌ی راحت و حجم ۳۵۰ میلی‌لیتر. مناسب چای و قهوه و قابل شست‌شو در ماشین.",
+    variants: [
+      { name: "رنگ", options: ["سفید-طلایی", "سفید-سبز", "سفید-مرجانی"] },
+    ],
+  },
+  {
+    id: "candle-saffron",
+    name: "شمع معطر زعفرانی",
+    category: "لوازم خانه",
+    price: 690,
+    previousPrice: 850,
+    stock: 18,
+    featured: false,
+    isNew: true,
+    images: ["p-candle.svg", "p-candle-2.svg"],
+    alt: "شمع معطر زعفرانی در شیشه‌ی شفاف",
+    short: "شمع معطر با عطر زعفران و شمع طبیعی.",
+    full:
+      "شمع معطر با عطر زعفران، ساخته شده از شمع طبیعی. حدود ۴۰ ساعت روشن می‌ماند و در شیشه‌ی قابل‌استفاده مجدد عرضه می‌شود.",
+    variants: null,
+  },
+  {
+    id: "vase-ceramic",
+    name: "گلدان سرامیکی دست‌ساز",
+    category: "لوازم خانه",
+    price: 1300,
+    previousPrice: null,
+    stock: 7,
+    featured: true,
+    isNew: false,
+    images: ["p-vase.svg", "p-vase-2.svg"],
+    alt: "گلدان سرامیکی دست‌ساز با طرح هندسی",
+    short: "گلدان سرامیکی دست‌ساز با طرح هندسی.",
+    full:
+      "گلدان سرامیکی دست‌ساز با طرح هندسی و لعاب براق. هر قطعه کمی متفاوت است زیرا با دست ساخته می‌شود.",
+    variants: null,
+  },
+  {
+    id: "throw-blanket",
+    name: "پتو بافته‌ی نرم",
+    category: "لوازم خانه",
+    price: 2400,
+    previousPrice: null,
+    stock: 4,
+    featured: false,
+    isNew: false,
+    images: ["p-throw.svg", "p-throw-2.svg"],
+    alt: "پتو بافته نرم به رنگ بادمجانی",
+    short: "پتو بافته‌ی نرم و گرم برای فصل سرد.",
+    full:
+      "پتو بافته‌ی نرم و گرم با الیاف نرم، مناسب مبل و تخت. قابل شست‌شو و سبک.",
+    variants: null,
+  },
+
+  // ============ بسته‌های هدیه ============
+  {
+    id: "gift-jewelry-box",
+    name: "بسته هدیه جعبه زیورآلات",
+    category: "بسته‌های هدیه",
+    price: 2600,
+    previousPrice: null,
+    stock: 10,
+    featured: true,
+    isNew: true,
+    images: ["p-gift-jewelry.svg", "p-gift-jewelry-2.svg"],
+    alt: "بسته هدیه شامل گردنبند و گوشواره در جعبه",
+    short: "بسته هدیه شامل گردنبند و گوشواره هماهنگ در جعبه مخمل.",
+    full:
+      "بسته هدیه ارغوان شامل یک گردنبند و گوشواره هماهنگ، در جعبه مخمل با کارت تبریک. آماده‌ی هدیه دادن.",
+    variants: null,
+  },
+  {
+    id: "gift-spa-set",
+    name: "بسته اسپا و آرامش",
+    category: "بسته‌های هدیه",
+    price: 1750,
+    previousPrice: 2100,
+    stock: 11,
+    featured: false,
+    isNew: false,
+    images: ["p-gift-spa.svg", "p-gift-spa-2.svg"],
+    alt: "بسته اسپا شامل شمع و صابون و شامپو",
+    short: "بسته اسپا با شمع معطر، صابون دست‌ساز و شامپو.",
+    full:
+      "بسته اسپا و آرامش شامل شمع معطر، صابون دست‌ساز، شامپو ملایم و یک حوله‌ی نرم. در سبد حصیری عرضه می‌شود.",
+    variants: null,
+  },
+  {
+    id: "gift-tea-set",
+    name: "بسته چای‌خوری",
+    category: "بسته‌های هدیه",
+    price: 1980,
+    previousPrice: null,
+    stock: 8,
+    featured: true,
+    isNew: false,
+    images: ["p-gift-tea.svg", "p-gift-tea-2.svg"],
+    alt: "بسته چای‌خوری با ماگ و چای و شیرینی",
+    short: "بسته چای‌خوری با دو ماگ، چای و شیرینی.",
+    full:
+      "بسته چای‌خوری ارغوان شامل دو ماگ سرامیکی، یک بسته چای معطر و شیرینی خشک. مناسب هدیه‌ی خانه.",
+    variants: null,
+  },
+  {
+    id: "gift-romantic",
+    name: "بسته عاشقانه",
+    category: "بسته‌های هدیه",
+    price: 3200,
+    previousPrice: null,
+    stock: 3,
+    featured: false,
+    isNew: true,
+    images: ["p-gift-romantic.svg", "p-gift-romantic-2.svg"],
+    alt: "بسته عاشقانه با گل و شمع و کارت تبریک",
+    short: "بسته عاشقانه با گل خشک، شمع و کارت تبریک.",
+    full:
+      "بسته عاشقانه شامل شمع معطر، گل خشک، شکلات و کارت تبریک. در جعبه‌ی تزئینی با روبان ارسال می‌شود.",
+    variants: null,
+  },
+];
+
+if (typeof window !== "undefined") {
+  window.PRODUCTS = PRODUCTS;
+}

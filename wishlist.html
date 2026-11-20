@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fa-AF" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>علاقه‌مندی‌ها | فروشگاه آنلاین ارغوان</title>
+  <meta name="description" content="محصولات مورد علاقه شما در فروشگاه ارغوان." />
+  <link rel="icon" href="assets/images/brand/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <script>document.documentElement.classList.add('has-js');</script>
+</head>
+<body>
+  <div id="header-mount"></div>
+
+  <main class="container" style="padding-block:30px 60px;">
+    <nav class="breadcrumb" aria-label="مسیر">
+      <a href="index.html">خانه</a> / <span>علاقه‌مندی‌ها</span>
+    </nav>
+    <div class="page-title">
+      <h1>علاقه‌مندی‌های من</h1>
+      <p id="wish-count-text"></p>
+    </div>
+    <div id="wish-root"></div>
+  </main>
+
+  <div id="footer-mount"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/products.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    (function () {
+      const store = window.ArghavanStore;
+      const root = document.getElementById("wish-root");
+
+      function render() {
+        const ids = store.getWishlist();
+        const items = ids.map((id) => store.getProductById(id)).filter(Boolean);
+        document.getElementById("wish-count-text").textContent =
+          items.length ? store.toFaNum(String(items.length)) + " محصول در علاقه‌مندی‌ها" : "";
+
+        if (!items.length) {
+          root.innerHTML = `
+            <div class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              <h2>علاقه‌مندی شما خالی است</h2>
+              <p>محصولاتی که دوست دارید را با قلب به اینجا اضافه کنید.</p>
+              <a href="shop.html" class="btn btn-primary">مشاهده محصولات</a>
+            </div>`;
+          return;
+        }
+
+        root.innerHTML = `<div class="product-grid" id="wish-grid"></div>`;
+        const grid = document.getElementById("wish-grid");
+        grid.innerHTML = items.map(window.productCardHTML).join("");
+        store.revealOnScroll();
+      }
+
+      render();
+      document.addEventListener("arghavan:wishlist-change", render);
+    })();
+  </script>
+</body>
+</html>

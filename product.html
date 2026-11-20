@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fa-AF" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>جزئیات محصول | فروشگاه آنلاین ارغوان</title>
+  <meta name="description" content="جزئیات محصول در فروشگاه آنلاین ارغوان — تصاویر، توضیحات، قیمت و افزودن به سبد خرید." />
+  <link rel="icon" href="assets/images/brand/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <script>document.documentElement.classList.add('has-js');</script>
+</head>
+<body>
+  <div id="header-mount"></div>
+
+  <main class="container" style="padding-block:30px 60px;">
+    <nav class="breadcrumb" id="breadcrumb" aria-label="مسیر">
+      <a href="index.html">خانه</a> / <a href="shop.html">محصولات</a> / <span id="crumb-name">محصول</span>
+    </nav>
+
+    <div id="product-root"></div>
+
+    <section class="related" id="related-section" style="display:none;">
+      <h2>محصولات مرتبط</h2>
+      <div class="product-grid" id="related-grid"></div>
+    </section>
+  </main>
+
+  <div id="footer-mount"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/products.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    (function () {
+      const store = window.ArghavanStore;
+      const root = document.getElementById("product-root");
+      const params = new URLSearchParams(location.search);
+      const id = params.get("id");
+      const product = store.getProductById(id);
+
+      if (!product) {
+        root.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <h2>محصول یافت نشد</h2>
+            <p>این محصول ممکن است حذف شده باشد یا لینک نادرست است.</p>
+            <a href="shop.html" class="btn btn-primary">بازگشت به فروشگاه</a>
+          </div>`;
+        document.getElementById("related-section").style.display = "none";
+        document.title = "محصول یافت نشد | فروشگاه ارغوان";
+        return;
+      }
+
+      document.title = product.name + " | فروشگاه ارغوان";
+      document.getElementById("crumb-name").textContent = product.name;
+
+      const out = product.stock <= 0;
+      const discount = product.previousPrice && product.previousPrice > product.price;
+      let currentImg = 0;
+
+      function variantString() {
+        const selects = root.querySelectorAll(".variant-select select");
+        if (!selects.length) return "";
+        return Array.from(selects).map((s) => {
+          const label = s.getAttribute("data-label");
+          return label + ": " + s.value;
+        }).join("، ");
+      }
+
+      function renderGallery() {
+        const main = root.querySelector(".main-img img");
+        main.src = "assets/images/products/" + product.images[currentImg];
+        main.alt = product.alt;
+        root.querySelectorAll(".thumb-btn").forEach((b, i) => {
+          b.classList.toggle("active", i === currentImg);
+        });
+      }
+
+      const priceHtml = discount
+        ? `<span class="price">${store.formatPrice(product.price)}</span><span class="prev-price">${store.formatPrice(product.previousPrice)}</span>`
+        : `<span class="price">${store.formatPrice(product.price)}</span>`;
+
+      const stockHtml = out
+        ? `<span class="stock out">ناموجود</span>`
+        : `<span class="stock in">موجود — ${store.toFaNum(String(product.stock))} عدد در انبار</span>`;
+
+      const variantHtml = (product.variants || []).map((v, i) =>
+        `<div class="variant-select">
+          <label for="variant-${i}">${v.name}</label>
+          <select id="variant-${i}" data-label="${v.name}">
+            ${v.options.map((o) => `<option value="${o}">${o}</option>`).join("")}
+          </select>
+        </div>`
+      ).join("");
+
+      const wished = store.isWished(product.id);
+
+      root.innerHTML = `
+        <div class="product-detail-grid">
+          <div class="gallery">
+            <div class="main-img"><img src="assets/images/products/${product.images[0]}" alt="${product.alt}" width="600" height="600" fetchpriority="high" /></div>
+            <div class="thumbs">
+              ${product.images.map((img, i) =>
+                `<button class="thumb-btn ${i === 0 ? "active" : ""}" data-img="${i}" aria-label="تصویر ${store.toFaNum(String(i+1))}"><img src="assets/images/products/${img}" alt="" width="72" height="72" loading="lazy" /></button>`
+              ).join("")}
+            </div>
+          </div>
+          <div class="detail-info">
+            <span class="cat-tag">${product.category}</span>
+            <h1>${product.name}</h1>
+            <div class="price-row">${priceHtml}</div>
+            ${stockHtml}
+            <p class="desc">${product.full}</p>
+            ${variantHtml}
+            <div class="qty-row" id="qty-row">
+              <span>تعداد:</span>
+              <div class="qty-control">
+                <button id="qty-minus" aria-label="کاهش">−</button>
+                <input type="number" id="qty-input" value="1" min="1" max="${product.stock}" aria-label="تعداد" />
+                <button id="qty-plus" aria-label="افزایش">+</button>
+              </div>
+            </div>
+            <div class="detail-actions">
+              <button class="btn btn-primary" id="add-cart-btn" ${out ? "disabled" : ""}>${out ? "ناموجود" : "افزودن به سبد خرید"}</button>
+              <button class="btn btn-outline" id="wish-detail-btn">${wished ? "حذف از علاقه‌مندی" : "افزودن به علاقه‌مندی"}</button>
+            </div>
+          </div>
+        </div>`;
+
+      // gallery
+      root.querySelectorAll(".thumb-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          currentImg = parseInt(btn.getAttribute("data-img"));
+          renderGallery();
+        });
+      });
+
+      // qty
+      const qtyInput = document.getElementById("qty-input");
+      document.getElementById("qty-minus").addEventListener("click", () => {
+        let v = parseInt(qtyInput.value) || 1;
+        if (v > 1) { v--; qtyInput.value = v; }
+      });
+      document.getElementById("qty-plus").addEventListener("click", () => {
+        let v = parseInt(qtyInput.value) || 1;
+        if (v < product.stock) { v++; qtyInput.value = v; }
+      });
+      qtyInput.addEventListener("change", () => {
+        let v = parseInt(qtyInput.value) || 1;
+        if (v < 1) v = 1;
+        if (v > product.stock) v = product.stock;
+        qtyInput.value = v;
+      });
+
+      // add to cart
+      document.getElementById("add-cart-btn").addEventListener("click", () => {
+        const qty = parseInt(qtyInput.value) || 1;
+        const variant = variantString();
+        const ok = store.addToCart(product.id, variant, qty);
+        if (ok) store.toast("به سبد خرید اضافه شد");
+        else store.toast("موجودی کافی نیست");
+      });
+
+      // wishlist
+      const wishBtn = document.getElementById("wish-detail-btn");
+      wishBtn.addEventListener("click", () => {
+        const added = store.toggleWishlist(product.id);
+        wishBtn.textContent = added ? "حذف از علاقه‌مندی" : "افزودن به علاقه‌مندی";
+        store.toast(added ? "به علاقه‌مندی‌ها اضافه شد" : "از علاقه‌مندی‌ها حذف شد");
+      });
+
+      // related
+      const related = PRODUCTS.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
+      if (related.length) {
+        document.getElementById("related-grid").innerHTML = related.map(window.productCardHTML).join("");
+        document.getElementById("related-section").style.display = "block";
+        store.revealOnScroll();
+      }
+    })();
+  </script>
+</body>
+</html>

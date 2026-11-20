@@ -1,0 +1,7 @@
+{
+  "name": "arghavan-store",
+  "private": true,
+  "version": "1.0.0",
+  "description": "فروشگاه آنلاین ارغوان — قالب فروشگاه ایستا",
+  "type": "module"
+}

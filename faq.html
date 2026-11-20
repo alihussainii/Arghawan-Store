@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fa-AF" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>سوالات متداول و سیاست‌ها | فروشگاه آنلاین ارغوان</title>
+  <meta name="description" content="سوالات متداول درباره سفارش، تحویل، پرداخت، مرجوعی و حریم خصوصی در فروشگاه ارغوان." />
+  <link rel="icon" href="assets/images/brand/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <script>document.documentElement.classList.add('has-js');</script>
+</head>
+<body>
+  <div id="header-mount"></div>
+
+  <main class="container" style="padding-block:30px 60px;">
+    <nav class="breadcrumb" aria-label="مسیر">
+      <a href="index.html">خانه</a> / <span>سوالات متداول</span>
+    </nav>
+    <div class="page-title">
+      <h1>سوالات متداول</h1>
+      <p>پاسخ پرسش‌های رایج درباره سفارش، تحویل و پرداخت.</p>
+    </div>
+
+    <div class="faq-list" id="faq-list"></div>
+  </main>
+
+  <div id="footer-mount"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/products.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    (function () {
+      const cfg = SHOP_CONFIG;
+      const faqs = [
+        {
+          q: "چگونه سفارش بدهم؟",
+          a: "محصول مورد نظر را انتخاب کنید، به سبد خرید اضافه کنید، سپس در صفحه‌ی تکمیل سفارش اطلاعات تحویل را وارد کرده و سفارش را از طریق واتساپ ارسال کنید."
+        },
+        {
+          q: "هزینه و زمان تحویل چقدر است؟",
+          a: "هزینه و زمان تحویل بسته به منطقه‌ی شما متفاوت است. مناطق و هزینه‌های نمونه را می‌توانید در صفحه‌ی سبد خرید و تکمیل سفارش ببینید. ارسال برای سفارش‌های بالای " + cfg.freeShippingThreshold + " افغانی رایگان است."
+        },
+        {
+          q: "روش پرداخت چیست؟",
+          a: "در حال حاضر پرداخت به‌صورت نقدی هنگام تحویل (پرداخت هنگام تحویل) انجام می‌شود."
+        },
+        {
+          q: "آیا می‌توانم محصول را مرجوع کنم؟",
+          a: "اگر محصول دارای عیب باشد، ظرف ۲۴ ساعت پس از تحویل با ما تماس بگیرید تا جایگزین شود. محصولات استفاده‌شده مرجوع نمی‌شوند."
+        },
+        {
+          q: "اگر محصول ناموجود باشد چه؟",
+          a: "محصولات ناموجود در صفحه‌ی محصول با برچسب «ناموجود» نشان داده می‌شوند و امکان افزودن به سبد را ندارند. بعداً دوباره بررسی کنید."
+        },
+        {
+          q: "اطلاعات شخصی من چگونه نگه‌داری می‌شود؟",
+          a: "اطلاعات سفارش شما فقط برای ارسال سفارش استفاده می‌شود و در فروشگاه ذخیره نمی‌شود. سبد خرید و علاقه‌مندی‌ها در مرورگر خود شما نگه‌داری می‌شوند."
+        },
+      ];
+
+      document.getElementById("faq-list").innerHTML = faqs.map((f) =>
+        `<details class="faq-item" data-reveal>
+          <summary><span>${f.q}</span><span class="icon" aria-hidden="true">+</span></summary>
+          <div class="answer"><p>${f.a}</p></div>
+        </details>`
+      ).join("");
+
+      window.ArghavanStore.revealOnScroll();
+    })();
+  </script>
+</body>
+</html>

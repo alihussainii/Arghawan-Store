@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="65%">
+      <stop offset="0%" stop-color="#FFFCF8"/>
+      <stop offset="100%" stop-color="#EFE3D0"/>
+    </radialGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+  </defs>
+  <rect width="600" height="600" fill="url(#bg)"/>
+  
+    <ellipse cx="300" cy="500" rx="160" ry="22" fill="rgba(67,36,62,0.12)" filter="url(#soft)"/>
+    <g transform="translate(300,310)">
+      <rect x="-130" y="-20" width="260" height="100" rx="10" fill="#C97A5C"/>
+      <rect x="-140" y="-35" width="280" height="26" rx="6" fill="#A85E42"/>
+      <g transform="translate(-70,20)">
+        <rect x="-30" y="-30" width="60" height="55" rx="6" fill="#EFE3D0"/>
+        <rect x="-30" y="-30" width="60" height="14" fill="#A34373"/>
+      </g>
+      <g transform="translate(70,20)">
+        <rect x="-30" y="-30" width="60" height="55" rx="6" fill="#EFE3D0"/>
+        <rect x="-30" y="-30" width="60" height="14" fill="#4E8A8A"/>
+      </g>
+      <rect x="-20" y="0" width="40" height="50" rx="4" fill="#C9A227"/>
+    </g>
+</svg>

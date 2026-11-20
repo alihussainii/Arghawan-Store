@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fa-AF" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تماس با ما | فروشگاه آنلاین ارغوان</title>
+  <meta name="description" content="راه‌های ارتباطی با فروشگاه ارغوان — تلفن، ایمیل، آدرس و ساعات کاری." />
+  <link rel="icon" href="assets/images/brand/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <script>document.documentElement.classList.add('has-js');</script>
+</head>
+<body>
+  <div id="header-mount"></div>
+
+  <main class="container" style="padding-block:30px 60px;">
+    <nav class="breadcrumb" aria-label="مسیر">
+      <a href="index.html">خانه</a> / <span>تماس</span>
+    </nav>
+    <div class="page-title">
+      <h1>تماس با ارغوان</h1>
+      <p>برای سفارش یا پرسش، از راه‌های زیر با ما در ارتباط باشید.</p>
+    </div>
+
+    <div class="contact-grid">
+      <div class="contact-info-card" id="contact-card" data-reveal></div>
+      <div class="contact-info-card" data-reveal>
+        <h3>ساعات کاری</h3>
+        <div id="hours-card"></div>
+        <h3 style="margin-block-start:24px;">شبکه‌های اجتماعی</h3>
+        <div id="social-card" style="display:flex;gap:12px;flex-wrap:wrap;"></div>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-mount"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/products.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    (function () {
+      const cfg = SHOP_CONFIG;
+      const I = window.ICONS;
+      const card = document.getElementById("contact-card");
+
+      let rows = "";
+      if (cfg.phone) rows += infoRow(I.phone, "تلفن", `<a href="tel:${cfg.phone}" class="ltr">${cfg.phone}</a>`);
+      if (cfg.email) rows += infoRow(I.mail, "ایمیل", `<a href="mailto:${cfg.email}" class="ltr">${cfg.email}</a>`);
+      if (cfg.address) rows += infoRow(I.pin, "آدرس", cfg.address);
+      if (cfg.whatsapp) rows += infoRow(I.whatsapp, "واتساپ", `<a href="https://wa.me/${cfg.whatsapp.replace(/[^0-9]/g,'')}" target="_blank" rel="noopener" class="ltr">${cfg.whatsapp}</a>`);
+      card.innerHTML = `<h3>اطلاعات تماس</h3>` + rows;
+
+      function infoRow(icon, label, value) {
+        return `<div class="info-row"><span class="icon">${icon}</span><div><div class="label">${label}</div><div class="value">${value}</div></div></div>`;
+      }
+
+      const hoursCard = document.getElementById("hours-card");
+      hoursCard.innerHTML = cfg.hours.map((h) => `<div class="info-row"><span class="icon">${I.clock}</span><div><div class="label">${h.day}</div><div class="value">${h.time}</div></div></div>`).join("");
+
+      const socialCard = document.getElementById("social-card");
+      let socials = [];
+      if (cfg.social.instagram) socials.push(`<a href="${cfg.social.instagram}" target="_blank" rel="noopener" class="icon-btn" aria-label="اینستاگرام">${I.instagram}</a>`);
+      if (cfg.social.facebook) socials.push(`<a href="${cfg.social.facebook}" target="_blank" rel="noopener" class="icon-btn" aria-label="فیسبوک">${I.facebook}</a>`);
+      if (cfg.social.telegram) socials.push(`<a href="${cfg.social.telegram}" target="_blank" rel="noopener" class="icon-btn" aria-label="تلگرام">${I.telegram}</a>`);
+      socialCard.innerHTML = socials.join("") || "<p>هنوز شبکه اجتماعی تنظیم نشده است.</p>";
+    })();
+  </script>
+</body>
+</html>

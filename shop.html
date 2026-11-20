@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fa-AF" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>محصولات | فروشگاه آنلاین ارغوان</title>
+  <meta name="description" content="همه محصولات فروشگاه ارغوان — جستجو و فیلتر بر اساس دسته، قیمت و موجودی. زیورآلات، کیف و اکسسوری، لوازم خانه و بسته‌های هدیه." />
+  <link rel="icon" href="assets/images/brand/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <script>document.documentElement.classList.add('has-js');</script>
+</head>
+<body>
+  <div id="header-mount"></div>
+
+  <main class="container" style="padding-block:30px 60px;">
+    <nav class="breadcrumb" aria-label="مسیر">
+      <a href="index.html">خانه</a> / <span>محصولات</span>
+    </nav>
+
+    <div class="page-title">
+      <h1>محصولات ارغوان</h1>
+      <p>زیورآلات، اکسسوری، لوازم خانه و بسته‌های هدیه</p>
+    </div>
+
+    <div class="shop-search" style="margin-block-end:20px;">
+      <input type="search" id="shop-search" placeholder="جستجوی محصول..." aria-label="جستجوی محصول" style="width:100%;max-width:480px;margin-inline:auto;display:block;" />
+    </div>
+
+    <div class="shop-layout">
+      <aside>
+        <button class="btn btn-ghost filter-toggle" id="filter-toggle" style="margin-block-end:16px;">نمایش فیلترها</button>
+        <div class="shop-filters" id="filters">
+          <div class="filter-group">
+            <h3>دسته‌بندی</h3>
+            <div id="cat-filters"></div>
+          </div>
+          <div class="filter-group">
+            <h3>قیمت (افغانی)</h3>
+            <div id="price-filters"></div>
+          </div>
+          <div class="filter-group">
+            <h3>موجودی</h3>
+            <label class="filter-opt"><input type="checkbox" id="in-stock" /> فقط محصولات موجود</label>
+          </div>
+          <div class="filter-group">
+            <button class="clear-btn" id="clear-filters">پاک کردن فیلترها</button>
+          </div>
+        </div>
+      </aside>
+
+      <section>
+        <div class="shop-results-head">
+          <span class="count" id="result-count"></span>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <label for="sort-select" style="font-size:0.9rem;">مرتب‌سازی:</label>
+            <select id="sort-select" class="sort-select">
+              <option value="newest">جدیدترین</option>
+              <option value="priceLow">ارزان‌ترین</option>
+              <option value="priceHigh">گران‌ترین</option>
+            </select>
+          </div>
+        </div>
+        <div class="product-grid" id="shop-grid"></div>
+        <div id="empty-state" class="empty-state" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <h2>محصولی یافت نشد</h2>
+          <p>فیلترها یا عبارت جستجو را تغییر دهید.</p>
+          <button class="btn btn-outline" id="empty-clear">پاک کردن فیلترها</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="footer-mount"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/products.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    (function () {
+      const store = window.ArghavanStore;
+      const CATEGORIES = ["زیورآلات", "کیف و اکسسوری", "لوازم خانه", "بسته‌های هدیه"];
+      const PRICE_BUCKETS = [
+        { id: "p1", label: "تا ۱٬۰۰۰", min: 0, max: 1000 },
+        { id: "p2", label: "۱٬۰۰۰ تا ۲٬۰۰۰", min: 1000, max: 2000 },
+        { id: "p3", label: "۲٬۰۰۰ تا ۳٬۰۰۰", min: 2000, max: 3000 },
+        { id: "p4", label: "بالای ۳٬۰۰۰", min: 3000, max: Infinity },
+      ];
+
+      const state = { q: "", cats: new Set(), prices: new Set(), inStock: false, sort: SHOP_CONFIG.defaultSort };
+
+      // read URL params
+      const params = new URLSearchParams(location.search);
+      if (params.get("q")) state.q = params.get("q");
+      if (params.get("cat")) state.cats.add(params.get("cat"));
+      if (params.get("sort")) state.sort = params.get("sort");
+      if (params.get("sort") === "newest") state.sort = "newest";
+
+      // build filters
+      const catFilters = document.getElementById("cat-filters");
+      catFilters.innerHTML = CATEGORIES.map((c) =>
+        `<label class="filter-opt"><input type="checkbox" value="${c}" ${state.cats.has(c) ? "checked" : ""} /> ${c}</label>`
+      ).join("");
+      catFilters.addEventListener("change", (e) => {
+        if (e.target.checked) state.cats.add(e.target.value);
+        else state.cats.delete(e.target.value);
+        render();
+      });
+
+      const priceFilters = document.getElementById("price-filters");
+      priceFilters.innerHTML = PRICE_BUCKETS.map((b) =>
+        `<label class="filter-opt"><input type="checkbox" value="${b.id}" ${state.prices.has(b.id) ? "checked" : ""} /> ${b.label}</label>`
+      ).join("");
+      priceFilters.addEventListener("change", (e) => {
+        if (e.target.checked) state.prices.add(e.target.value);
+        else state.prices.delete(e.target.value);
+        render();
+      });
+
+      document.getElementById("in-stock").addEventListener("change", (e) => {
+        state.inStock = e.target.checked;
+        render();
+      });
+
+      const sortSelect = document.getElementById("sort-select");
+      sortSelect.value = state.sort;
+      sortSelect.addEventListener("change", (e) => { state.sort = e.target.value; render(); });
+
+      const searchInput = document.getElementById("shop-search");
+      searchInput.value = state.q;
+      let searchTimer;
+      searchInput.addEventListener("input", (e) => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => { state.q = e.target.value.trim(); render(); }, 200);
+      });
+
+      function clearAll() {
+        state.q = ""; state.cats.clear(); state.prices.clear(); state.inStock = false;
+        state.sort = SHOP_CONFIG.defaultSort;
+        searchInput.value = "";
+        sortSelect.value = state.sort;
+        catFilters.querySelectorAll("input").forEach((i) => (i.checked = false));
+        priceFilters.querySelectorAll("input").forEach((i) => (i.checked = false));
+        document.getElementById("in-stock").checked = false;
+        render();
+      }
+      document.getElementById("clear-filters").addEventListener("click", clearAll);
+      document.getElementById("empty-clear").addEventListener("click", clearAll);
+
+      // mobile filter toggle
+      const filterToggle = document.getElementById("filter-toggle");
+      filterToggle.addEventListener("click", () => {
+        document.getElementById("filters").classList.toggle("open");
+      });
+
+      function render() {
+        let list = PRODUCTS.slice();
+        if (state.q) {
+          const q = state.q.toLowerCase();
+          list = list.filter((p) => p.name.toLowerCase().includes(q) || p.short.toLowerCase().includes(q) || p.category.includes(state.q));
+        }
+        if (state.cats.size) list = list.filter((p) => state.cats.has(p.category));
+        if (state.prices.size) {
+          list = list.filter((p) => {
+            return [...state.prices].some((id) => {
+              const b = PRICE_BUCKETS.find((x) => x.id === id);
+              return b && p.price >= b.min && p.price < b.max;
+            });
+          });
+        }
+        if (state.inStock) list = list.filter((p) => p.stock > 0);
+
+        if (state.sort === "priceLow") list.sort((a, b) => a.price - b.price);
+        else if (state.sort === "priceHigh") list.sort((a, b) => b.price - a.price);
+        else list.sort((a, b) => (b.isNew === true ? 1 : 0) - (a.isNew === true ? 1 : 0));
+
+        const grid = document.getElementById("shop-grid");
+        const empty = document.getElementById("empty-state");
+        const countEl = document.getElementById("result-count");
+        const faCount = store.toFaNum(String(list.length));
+        countEl.textContent = list.length + " محصول یافت شد";
+
+        if (list.length === 0) {
+          grid.innerHTML = "";
+          empty.style.display = "block";
+        } else {
+          empty.style.display = "none";
+          grid.innerHTML = list.map(window.productCardHTML).join("");
+          store.revealOnScroll();
+        }
+      }
+
+      render();
+    })();
+  </script>
+</body>
+</html>

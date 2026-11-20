@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fa-AF" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>سبد خرید | فروشگاه آنلاین ارغوان</title>
+  <meta name="description" content="سبد خرید شما در فروشگاه ارغوان — مرور اقلام، تغییر تعداد و ادامه به پرداخت." />
+  <link rel="icon" href="assets/images/brand/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <script>document.documentElement.classList.add('has-js');</script>
+</head>
+<body>
+  <div id="header-mount"></div>
+
+  <main class="container" style="padding-block:30px 60px;">
+    <nav class="breadcrumb" aria-label="مسیر">
+      <a href="index.html">خانه</a> / <span>سبد خرید</span>
+    </nav>
+    <div class="page-title">
+      <h1>سبد خرید من</h1>
+    </div>
+    <div id="cart-root"></div>
+  </main>
+
+  <div id="footer-mount"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/products.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    (function () {
+      const store = window.ArghavanStore;
+      const root = document.getElementById("cart-root");
+
+      function render() {
+        const cart = store.getCart();
+        if (!cart.length) {
+          root.innerHTML = `
+            <div class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              <h2>سبد خرید شما خالی است</h2>
+              <p>محصولات مورد نظر را به سبد خرید اضافه کنید.</p>
+              <a href="shop.html" class="btn btn-primary">شروع خرید</a>
+            </div>`;
+          return;
+        }
+
+        const subtotal = store.cartSubtotal();
+        const itemsHtml = cart.map((item) => {
+          const p = store.getProductById(item.id);
+          if (!p) return "";
+          const out = p.stock <= 0;
+          return `
+            <div class="cart-item">
+              <a href="product.html?id=${p.id}" class="ci-img"><img src="assets/images/products/${p.images[0]}" alt="${p.alt}" loading="lazy" width="90" height="90" /></a>
+              <div>
+                <a href="product.html?id=${p.id}" class="ci-name">${p.name}</a>
+                ${item.variant ? `<div class="ci-variant">${item.variant}</div>` : ""}
+                <div class="ci-variant">قیمت واحد: ${store.formatPrice(p.price)}</div>
+              </div>
+              <div class="qty-control" data-id="${p.id}" data-variant="${item.variant.replace(/"/g, '&quot;')}">
+                <button class="cart-minus" aria-label="کاهش">−</button>
+                <input type="number" class="cart-qty" value="${item.qty}" min="1" max="${p.stock}" aria-label="تعداد" />
+                <button class="cart-plus" aria-label="افزایش">+</button>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+                <span class="ci-price">${store.formatPrice(p.price * item.qty)}</span>
+                <button class="ci-remove" data-id="${p.id}" data-variant="${item.variant.replace(/"/g, '&quot;')}">حذف</button>
+              </div>
+            </div>`;
+        }).join("");
+
+        root.innerHTML = `
+          <div style="display:grid;grid-template-columns:1fr 320px;gap:32px;align-items:start;" class="cart-layout">
+            <div class="cart-list">${itemsHtml}</div>
+            <aside class="summary-card">
+              <h3>خلاصه سفارش</h3>
+              <div class="summary-row"><span>جمع کل</span><span>${store.formatPrice(subtotal)}</span></div>
+              <div class="summary-row"><span>هزینه تحویل</span><span id="delivery-fee-cell">انتخاب منطقه</span></div>
+              <div class="summary-row total"><span>مجموع</span><span id="grand-total">${store.formatPrice(subtotal)}</span></div>
+              <label style="display:block;margin-block:14px 6px;font-weight:500;font-size:0.9rem;">منطقه تحویل</label>
+              <select id="zone-select" style="width:100%;padding:10px 14px;border:1.5px solid var(--line);border-radius:var(--r-md);font-family:inherit;">
+                <option value="">انتخاب کنید...</option>
+                ${SHOP_CONFIG.deliveryZones.map((z) => `<option value="${z.id}">${z.name} — ${store.formatPrice(z.fee)}</option>`).join("")}
+              </select>
+              <p id="zone-eta" style="font-size:0.82rem;color:var(--charcoal-soft);margin-block:8px 16px;min-height:1em;"></p>
+              <a href="checkout.html" class="btn btn-primary btn-block" id="checkout-link">ادامه به پرداخت</a>
+              <a href="shop.html" class="btn btn-outline btn-block" style="margin-block-start:10px;">ادامه خرید</a>
+            </aside>
+          </div>`;
+
+        // responsive
+        if (window.matchMedia("(max-width: 860px)").matches) {
+          root.querySelector(".cart-layout").style.gridTemplateColumns = "1fr";
+        }
+
+        // qty handlers
+        root.querySelectorAll(".qty-control").forEach((qc) => {
+          const id = qc.getAttribute("data-id");
+          const variant = qc.getAttribute("data-variant");
+          const input = qc.querySelector(".cart-qty");
+          qc.querySelector(".cart-minus").addEventListener("click", () => {
+            let v = parseInt(input.value) || 1;
+            store.updateQty(id, variant, v - 1);
+          });
+          qc.querySelector(".cart-plus").addEventListener("click", () => {
+            let v = parseInt(input.value) || 1;
+            store.updateQty(id, variant, v + 1);
+          });
+          input.addEventListener("change", () => {
+            store.updateQty(id, variant, parseInt(input.value) || 1);
+          });
+        });
+
+        // remove
+        root.querySelectorAll(".ci-remove").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            store.removeFromCart(btn.getAttribute("data-id"), btn.getAttribute("data-variant"));
+            store.toast("از سبد خرید حذف شد");
+          });
+        });
+
+        // delivery zone
+        const zoneSelect = document.getElementById("zone-select");
+        const feeCell = document.getElementById("delivery-fee-cell");
+        const grandTotal = document.getElementById("grand-total");
+        const etaEl = document.getElementById("zone-eta");
+        let currentFee = 0;
+        zoneSelect.addEventListener("change", () => {
+          const zone = SHOP_CONFIG.deliveryZones.find((z) => z.id === zoneSelect.value);
+          if (!zone) {
+            currentFee = 0;
+            feeCell.textContent = "انتخاب منطقه";
+            grandTotal.textContent = store.formatPrice(subtotal);
+            etaEl.textContent = "";
+            return;
+          }
+          let fee = zone.fee;
+          if (SHOP_CONFIG.freeShippingThreshold && subtotal >= SHOP_CONFIG.freeShippingThreshold) {
+            fee = 0;
+            feeCell.innerHTML = `<span class="free">رایگان</span>`;
+          } else {
+            feeCell.textContent = store.formatPrice(fee);
+          }
+          currentFee = fee;
+          etaEl.textContent = "زمان تحویل: " + zone.eta;
+          grandTotal.textContent = store.formatPrice(subtotal + fee);
+          // store for checkout
+          sessionStorage.setItem("arghavan_delivery_zone", zone.id);
+        });
+
+        // restore zone
+        const savedZone = sessionStorage.getItem("arghavan_delivery_zone");
+        if (savedZone) { zoneSelect.value = savedZone; zoneSelect.dispatchEvent(new Event("change")); }
+      }
+
+      render();
+      document.addEventListener("arghavan:cart-change", render);
+    })();
+  </script>
+</body>
+</html>

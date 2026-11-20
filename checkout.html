@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fa-AF" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تکمیل سفارش | فروشگاه آنلاین ارغوان</title>
+  <meta name="description" content="تکمیل سفارش در فروشگاه ارغوان — اطلاعات تحویل و ارسال سفارش از طریق واتساپ." />
+  <link rel="icon" href="assets/images/brand/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <script>document.documentElement.classList.add('has-js');</script>
+</head>
+<body>
+  <div id="header-mount"></div>
+
+  <main class="container" style="padding-block:30px 60px;">
+    <nav class="breadcrumb" aria-label="مسیر">
+      <a href="index.html">خانه</a> / <a href="cart.html">سبد خرید</a> / <span>تکمیل سفارش</span>
+    </nav>
+    <div class="page-title">
+      <h1>تکمیل سفارش</h1>
+      <p>اطلاعات تحویل را وارد کنید و سفارش را از طریق واتساپ ارسال کنید.</p>
+    </div>
+    <div id="checkout-root"></div>
+  </main>
+
+  <div id="footer-mount"></div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/products.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    (function () {
+      const store = window.ArghavanStore;
+      const root = document.getElementById("checkout-root");
+      const cart = store.getCart();
+
+      if (!cart.length) {
+        root.innerHTML = `
+          <div class="empty-state">
+            <h2>سبد خرید شما خالی است</h2>
+            <p>برای تکمیل سفارش ابتدا محصولاتی را به سبد خرید اضافه کنید.</p>
+            <a href="shop.html" class="btn btn-primary">شروع خرید</a>
+          </div>`;
+        return;
+      }
+
+      const subtotal = store.cartSubtotal();
+      const savedZone = sessionStorage.getItem("arghavan_delivery_zone");
+      const zone = SHOP_CONFIG.deliveryZones.find((z) => z.id === savedZone) || SHOP_CONFIG.deliveryZones[0];
+      let deliveryFee = zone ? zone.fee : 0;
+      if (SHOP_CONFIG.freeShippingThreshold && subtotal >= SHOP_CONFIG.freeShippingThreshold) deliveryFee = 0;
+      const total = subtotal + deliveryFee;
+
+      const itemsHtml = cart.map((item) => {
+        const p = store.getProductById(item.id);
+        if (!p) return "";
+        return `<div class="summary-row"><span>${p.name}${item.variant ? " (" + item.variant + ")" : ""} × ${store.toFaNum(String(item.qty))}</span><span>${store.formatPrice(p.price * item.qty)}</span></div>`;
+      }).join("");
+
+      root.innerHTML = `
+        <div class="form-grid">
+          <form id="checkout-form" novalidate>
+            <h2 style="margin-block-end:20px;">اطلاعات تحویل</h2>
+            <div class="form-field" id="field-name">
+              <label for="name">نام و نام خانوادگی <span class="req">*</span></label>
+              <input type="text" id="name" name="name" autocomplete="name" />
+              <span class="error-msg">لطفاً نام و نام خانوادگی خود را وارد کنید.</span>
+            </div>
+            <div class="form-field" id="field-phone">
+              <label for="phone">شماره تماس <span class="req">*</span></label>
+              <input type="tel" id="phone" name="phone" class="ltr-input" autocomplete="tel" placeholder="مثال: 0701234567" dir="ltr" />
+              <span class="error-msg">شماره تماس معتبر وارد کنید (حداقل ۹ رقم).</span>
+            </div>
+            <div class="form-field" id="field-zone">
+              <label for="zone">شهر / منطقه تحویل <span class="req">*</span></label>
+              <select id="zone" name="zone">
+                <option value="">انتخاب کنید...</option>
+                ${SHOP_CONFIG.deliveryZones.map((z) => `<option value="${z.id}" ${z.id === (zone && zone.id) ? "selected" : ""}>${z.name}</option>`).join("")}
+              </select>
+              <span class="error-msg">لطفاً منطقه تحویل را انتخاب کنید.</span>
+            </div>
+            <div class="form-field" id="field-address">
+              <label for="address">آدرس تحویل <span class="req">*</span></label>
+              <textarea id="address" name="address" rows="3" autocomplete="street-address"></textarea>
+              <span class="error-msg">لطفاً آدرس کامل تحویل را وارد کنید.</span>
+            </div>
+            <div class="form-field">
+              <label for="notes">یادداشت (اختیاری)</label>
+              <textarea id="notes" name="notes" rows="2"></textarea>
+            </div>
+
+            <h3 style="margin-block:24px 12px;">روش پرداخت</h3>
+            <div class="payment-method">
+              <span class="check" aria-hidden="true"></span>
+              <div>
+                <strong>پرداخت هنگام تحویل</strong>
+                <div style="font-size:0.85rem;color:var(--charcoal-soft);">هزینه را نقدی به مأمور تحویل بپردازید.</div>
+              </div>
+            </div>
+
+            <div class="whatsapp-preview" id="preview-wrap" style="display:none;">
+              <h4>پیش‌نمایش پیام سفارش</h4>
+              <pre id="preview-text"></pre>
+            </div>
+
+            <div style="margin-block-start:24px;display:flex;flex-wrap:wrap;gap:12px;">
+              <button type="submit" class="btn btn-primary" id="prepare-btn">آماده‌سازی سفارش</button>
+              <button type="button" class="btn btn-outline" id="send-wa-btn" style="display:none;">ارسال سفارش از طریق واتساپ</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="copy-btn" style="display:none;">کپی سفارش</button>
+            </div>
+          </form>
+
+          <aside class="summary-card">
+            <h3>خلاصه سفارش</h3>
+            ${itemsHtml}
+            <div class="summary-row"><span>جمع کل</span><span>${store.formatPrice(subtotal)}</span></div>
+            <div class="summary-row"><span>هزینه تحویل</span><span id="fee-cell">${deliveryFee === 0 ? '<span class="free">رایگان</span>' : store.formatPrice(deliveryFee)}</span></div>
+            <div class="summary-row total"><span>مجموع</span><span id="total-cell">${store.formatPrice(total)}</span></div>
+            <p style="font-size:0.82rem;color:var(--charcoal-soft);margin-block-start:12px;" id="eta-cell">${zone ? "زمان تحویل: " + zone.eta : ""}</p>
+          </aside>
+        </div>`;
+
+      // update fee on zone change
+      const zoneSelect = document.getElementById("zone");
+      const feeCell = document.getElementById("fee-cell");
+      const totalCell = document.getElementById("total-cell");
+      const etaCell = document.getElementById("eta-cell");
+      function updateFee() {
+        const z = SHOP_CONFIG.deliveryZones.find((x) => x.id === zoneSelect.value);
+        if (!z) return;
+        let fee = z.fee;
+        if (SHOP_CONFIG.freeShippingThreshold && subtotal >= SHOP_CONFIG.freeShippingThreshold) fee = 0;
+        feeCell.innerHTML = fee === 0 ? '<span class="free">رایگان</span>' : store.formatPrice(fee);
+        totalCell.textContent = store.formatPrice(subtotal + fee);
+        etaCell.textContent = "زمان تحویل: " + z.eta;
+      }
+      zoneSelect.addEventListener("change", updateFee);
+
+      // validation
+      function validate() {
+        let valid = true;
+        const fields = [
+          { id: "name", el: document.getElementById("name"), test: (v) => v.trim().length >= 3 },
+          { id: "phone", el: document.getElementById("phone"), test: (v) => v.replace(/\D/g, "").length >= 9 },
+          { id: "zone", el: document.getElementById("zone"), test: (v) => !!v },
+          { id: "address", el: document.getElementById("address"), test: (v) => v.trim().length >= 8 },
+        ];
+        fields.forEach((f) => {
+          const wrap = document.getElementById("field-" + f.id);
+          const ok = f.test(f.el.value);
+          wrap.classList.toggle("invalid", !ok);
+          if (!ok) valid = false;
+        });
+        return valid;
+      }
+
+      function buildOrderMessage() {
+        const name = document.getElementById("name").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const zoneId = document.getElementById("zone").value;
+        const z = SHOP_CONFIG.deliveryZones.find((x) => x.id === zoneId);
+        const address = document.getElementById("address").value.trim();
+        const notes = document.getElementById("notes").value.trim();
+
+        let msg = "سلام " + SHOP_CONFIG.brandName + " 🌸\n";
+        msg += "می‌خواهم سفارش زیر را ثبت کنم:\n\n";
+        msg += "🛍 محصولات:\n";
+        cart.forEach((item) => {
+          const p = store.getProductById(item.id);
+          if (!p) return;
+          msg += "• " + p.name;
+          if (item.variant) msg += " (" + item.variant + ")";
+          msg += " × " + item.qty + " = " + p.price * item.qty + " افغانی\n";
+        });
+        msg += "\n💰 جمع کل: " + subtotal + " افغانی\n";
+        const fee = (SHOP_CONFIG.freeShippingThreshold && subtotal >= SHOP_CONFIG.freeShippingThreshold) ? 0 : (z ? z.fee : 0);
+        msg += "🚚 هزینه تحویل: " + (fee === 0 ? "رایگان" : fee + " افغانی") + "\n";
+        msg += "💵 مجموع: " + (subtotal + fee) + " افغانی\n";
+        msg += "💳 پرداخت: هنگام تحویل\n\n";
+        msg += "👤 نام: " + name + "\n";
+        msg += "📞 تلفن: " + phone + "\n";
+        msg += "📍 منطقه: " + (z ? z.name : "") + "\n";
+        msg += "🏠 آدرس: " + address + "\n";
+        if (notes) msg += "📝 یادداشت: " + notes + "\n";
+        return msg;
+      }
+
+      const form = document.getElementById("checkout-form");
+      const previewWrap = document.getElementById("preview-wrap");
+      const previewText = document.getElementById("preview-text");
+      const sendBtn = document.getElementById("send-wa-btn");
+      const copyBtn = document.getElementById("copy-btn");
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (!validate()) {
+          store.toast("لطفاً همه فیلدهای الزامی را پر کنید");
+          const firstInvalid = form.querySelector(".invalid input, .invalid select, .invalid textarea");
+          if (firstInvalid) firstInvalid.focus();
+          return;
+        }
+        const msg = buildOrderMessage();
+        previewText.textContent = msg;
+        previewWrap.style.display = "block";
+
+        if (SHOP_CONFIG.whatsapp) {
+          sendBtn.style.display = "inline-flex";
+          copyBtn.style.display = "inline-flex";
+          sendBtn.onclick = () => {
+            const num = SHOP_CONFIG.whatsapp.replace(/[^0-9]/g, "");
+            const url = "https://wa.me/" + num + "?text=" + encodeURIComponent(msg);
+            window.open(url, "_blank");
+          };
+        } else {
+          sendBtn.style.display = "none";
+          copyBtn.style.display = "inline-flex";
+        }
+        copyBtn.onclick = () => {
+          navigator.clipboard.writeText(msg).then(() => store.toast("سفارش کپی شد")).catch(() => store.toast("کپی نشد — متن را انتخاب و کپی کنید"));
+        };
+        store.toast("سفارش آماده شد");
+        previewWrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
+
+      // live clear errors
+      ["name", "phone", "zone", "address"].forEach((id) => {
+        const el = document.getElementById(id);
+        el.addEventListener("input", () => {
+          document.getElementById("field-" + id).classList.remove("invalid");
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
